@@ -21,7 +21,7 @@ video {
 
 .watermark {
   position: absolute;
-  bottom: 400px;
+  bottom: 65px;
   right: 10px;
   font-size: 25px;
   color: rgba(8, 8, 8, 0.5); /* Cor fraca para não atrapalhar o vídeo */
@@ -52,7 +52,6 @@ video {
   pointer-events: auto;
 }
 
-/* Restante dos estilos permanece igual */
 button {
   padding: 8px;
   font-size: 16px;
@@ -90,18 +89,27 @@ input[type="range"] {
   background: transparent;
 }
 
+/* Botão central do Play */
 .center-play-button {
   position: absolute;
+  width: 80px; /* Largura do botão */
+  height: 80px; /* Altura do botão */
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 60px;
-  color: white;
-  background: red;
-  border-radius: 50%;
-  padding: 20px;
+  background: red; /* Cor de fundo vermelha */
+  border-radius: 50%; /* Forma circular */
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
   animation: pulse 1.5s infinite;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.center-play-button svg {
+  font-size: 40px; /* Tamanho do ícone branco */
+  color: white; /* Cor do ícone */
 }
 
 @keyframes pulse {
@@ -118,4 +126,3 @@ input[type="range"] {
     opacity: 1;
   }
 }
-
