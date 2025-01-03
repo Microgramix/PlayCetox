@@ -85,7 +85,7 @@ button:hover {
 }
 
 input[type="range"] {
-  width: 100px;
+  width: 101px;
   margin: 0 10px;
   background: transparent;
 }
