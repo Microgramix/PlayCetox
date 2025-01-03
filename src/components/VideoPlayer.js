@@ -3,22 +3,28 @@ import "./VideoPlayer.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlay, faPause, faVolumeUp, faExpand } from "@fortawesome/free-solid-svg-icons";
 
-const VideoPlayer = ({ videoSrc, autoplay = false }) => {
+const VideoPlayer = ({ videoSrc, thumbnail, autoplay = false }) => {
   const videoRef = useRef(null);
   const containerRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(autoplay);
   const [volume, setVolume] = useState(1);
   const [progress, setProgress] = useState(0);
   const [showControls, setShowControls] = useState(true);
+  const [showPlayButton, setShowPlayButton] = useState(true);
   const hideControlsTimeout = useRef(null);
   const lastAllowedTime = useRef(0);
 
-  // Detecta Safari no iOS
+  /**
+   * Detecta se o navegador é Safari no iOS
+   */
   const isSafariIOS = () => {
     const ua = window.navigator.userAgent;
     return /iP(hone|ad|od)/.test(ua) && /Safari/.test(ua) && !/CriOS/.test(ua);
   };
 
+  /**
+   * Atualiza o progresso do vídeo na barra
+   */
   const updateProgress = () => {
     if (videoRef.current) {
       const current = videoRef.current.currentTime;
@@ -27,29 +33,32 @@ const VideoPlayer = ({ videoSrc, autoplay = false }) => {
     }
   };
 
+  /**
+   * Impede o usuário de avançar ou retroceder no vídeo
+   */
   const preventSeek = () => {
     if (videoRef.current) {
       const currentTime = videoRef.current.currentTime;
 
-      // Se o tempo atual for maior que o permitido, volta para o último tempo válido
       if (currentTime > lastAllowedTime.current + 0.3) {
         videoRef.current.currentTime = lastAllowedTime.current;
       } else {
-        lastAllowedTime.current = currentTime; // Atualiza o último tempo permitido
+        lastAllowedTime.current = currentTime;
       }
 
-      // Bloqueia se for para antes do início
       if (currentTime < 0) {
         videoRef.current.currentTime = 0;
       }
     }
   };
 
+  /**
+   * Monitoramento contínuo do progresso e bloqueio de seek no iOS
+   */
   useEffect(() => {
     if (videoRef.current) {
       videoRef.current.addEventListener("timeupdate", updateProgress);
 
-      // Monitoramento agressivo para Safari iOS
       if (isSafariIOS()) {
         const interval = setInterval(preventSeek, 100);
         return () => clearInterval(interval);
@@ -57,6 +66,9 @@ const VideoPlayer = ({ videoSrc, autoplay = false }) => {
     }
   }, []);
 
+  /**
+   * Reproduz o vídeo automaticamente se `autoplay` for true
+   */
   useEffect(() => {
     if (videoRef.current && autoplay) {
       videoRef.current.play();
@@ -64,22 +76,39 @@ const VideoPlayer = ({ videoSrc, autoplay = false }) => {
     }
   }, [autoplay]);
 
+  /**
+   * Alterna entre play e pause ao clicar no botão central ou no vídeo
+   */
   const togglePlayPause = () => {
     if (videoRef.current.paused) {
       videoRef.current.play();
       setIsPlaying(true);
+      setShowPlayButton(false);
+
+      // Entra em fullscreen automaticamente no primeiro play
+      if (containerRef.current.requestFullscreen) {
+        containerRef.current.requestFullscreen();
+      } else if (containerRef.current.webkitRequestFullscreen) {
+        containerRef.current.webkitRequestFullscreen();
+      } else if (containerRef.current.msRequestFullscreen) {
+        containerRef.current.msRequestFullscreen();
+      }
     } else {
       videoRef.current.pause();
       setIsPlaying(false);
     }
   };
 
+  /**
+   * Alterna entre fullscreen e modo normal ao clicar no botão fullscreen
+   */
   const toggleFullscreen = () => {
     if (
       document.fullscreenElement === containerRef.current ||
       document.webkitFullscreenElement === containerRef.current ||
       document.msFullscreenElement === containerRef.current
     ) {
+      // Sai do fullscreen
       if (document.exitFullscreen) {
         document.exitFullscreen();
       } else if (document.webkitExitFullscreen) {
@@ -88,6 +117,7 @@ const VideoPlayer = ({ videoSrc, autoplay = false }) => {
         document.msExitFullscreen();
       }
     } else {
+      // Entra no fullscreen
       if (containerRef.current.requestFullscreen) {
         containerRef.current.requestFullscreen();
       } else if (containerRef.current.webkitRequestFullscreen) {
@@ -98,12 +128,18 @@ const VideoPlayer = ({ videoSrc, autoplay = false }) => {
     }
   };
 
+  /**
+   * Configura o volume do vídeo
+   */
   const handleVolumeChange = (event) => {
     const newVolume = parseFloat(event.target.value);
     setVolume(newVolume);
     videoRef.current.volume = newVolume;
   };
 
+  /**
+   * Mostra os controles temporariamente ao mover o mouse
+   */
   const handleMouseMove = () => {
     setShowControls(true);
 
@@ -116,11 +152,31 @@ const VideoPlayer = ({ videoSrc, autoplay = false }) => {
     }, 3000);
   };
 
+  /**
+   * Remove o timeout dos controles ao desmontar o componente
+   */
   useEffect(() => {
     return () => {
       if (hideControlsTimeout.current) {
         clearTimeout(hideControlsTimeout.current);
       }
+    };
+  }, []);
+
+  /**
+   * Escuta mensagens do iframe para acionar o fullscreen
+   */
+  useEffect(() => {
+    const handleMessage = (event) => {
+      if (event.data === "requestFullscreen") {
+        togglePlayPause();
+      }
+    };
+
+    window.addEventListener("message", handleMessage);
+
+    return () => {
+      window.removeEventListener("message", handleMessage);
     };
   }, []);
 
@@ -133,9 +189,17 @@ const VideoPlayer = ({ videoSrc, autoplay = false }) => {
       <video
         ref={videoRef}
         src={videoSrc}
-        controls={false} // Remove os controles nativos
-        onClick={togglePlayPause} // Clique no vídeo apenas controla o play/pause
+        poster={thumbnail} // Configura o thumbnail do vídeo
+        controls={false}
+        onClick={togglePlayPause}
       ></video>
+
+      {showPlayButton && (
+        <div className="center-play-button" onClick={togglePlayPause}>
+          <FontAwesomeIcon icon={faPlay} />
+        </div>
+      )}
+
       <div className="controls-container">
         <div className={`controls ${showControls ? "visible" : ""}`}>
           <button onClick={togglePlayPause}>
