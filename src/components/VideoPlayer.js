@@ -5,6 +5,7 @@ import { faPlay, faPause, faVolumeUp, faExpand } from "@fortawesome/free-solid-s
 
 const VideoPlayer = ({ videoSrc, autoplay = false }) => {
   const videoRef = useRef(null);
+  const containerRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(autoplay);
   const [volume, setVolume] = useState(1);
   const [progress, setProgress] = useState(0);
@@ -52,6 +53,7 @@ const VideoPlayer = ({ videoSrc, autoplay = false }) => {
     }
   }, [autoplay]);
 
+  // Alterna entre play e pause ao clicar no vídeo
   const togglePlayPause = () => {
     if (videoRef.current.paused) {
       videoRef.current.play();
@@ -62,18 +64,37 @@ const VideoPlayer = ({ videoSrc, autoplay = false }) => {
     }
   };
 
+  // Alterna entre fullscreen e normal
+  const toggleFullscreen = () => {
+    if (
+      document.fullscreenElement === containerRef.current ||
+      document.webkitFullscreenElement === containerRef.current ||
+      document.msFullscreenElement === containerRef.current
+    ) {
+      // Sair do fullscreen
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      } else if (document.msExitFullscreen) {
+        document.msExitFullscreen();
+      }
+    } else {
+      // Entrar no fullscreen
+      if (containerRef.current.requestFullscreen) {
+        containerRef.current.requestFullscreen();
+      } else if (containerRef.current.webkitRequestFullscreen) {
+        containerRef.current.webkitRequestFullscreen();
+      } else if (containerRef.current.msRequestFullscreen) {
+        containerRef.current.msRequestFullscreen();
+      }
+    }
+  };
+
   const handleVolumeChange = (event) => {
     const newVolume = parseFloat(event.target.value);
     setVolume(newVolume);
     videoRef.current.volume = newVolume;
-  };
-
-  const handleFullscreen = () => {
-    if (videoRef.current.requestFullscreen) {
-      videoRef.current.requestFullscreen();
-    } else if (videoRef.current.webkitEnterFullscreen) {
-      videoRef.current.webkitEnterFullscreen();
-    }
   };
 
   const handleMouseMove = () => {
@@ -97,12 +118,16 @@ const VideoPlayer = ({ videoSrc, autoplay = false }) => {
   }, []);
 
   return (
-    <div className="video-player-container" onMouseMove={handleMouseMove}>
+    <div
+      className="video-player-container"
+      onMouseMove={handleMouseMove}
+      ref={containerRef}
+    >
       <video
         ref={videoRef}
         src={videoSrc}
-        controls={false}
-        onClick={togglePlayPause}
+        controls={false} // Remove os controles nativos
+        onClick={togglePlayPause} // Clique no vídeo apenas controla o play/pause
       ></video>
       <div className="controls-container">
         <div className={`controls ${showControls ? "visible" : ""}`}>
@@ -120,7 +145,7 @@ const VideoPlayer = ({ videoSrc, autoplay = false }) => {
             value={volume}
             onChange={handleVolumeChange}
           />
-          <button onClick={handleFullscreen}>
+          <button onClick={toggleFullscreen}>
             <FontAwesomeIcon icon={faExpand} />
           </button>
         </div>
