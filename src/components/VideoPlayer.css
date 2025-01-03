@@ -11,9 +11,12 @@
 
 video {
   width: 100%;
+  height: 100%; /* Garante que o vídeo e o thumbnail ocupem toda a altura do container */
+  object-fit: cover; /* Ajusta a imagem do thumbnail em cover */
+  background: black; /* Fundo preto para áreas sem conteúdo */
   display: block;
-  background: black;
 }
+
 
 .controls-container {
   position: relative;
