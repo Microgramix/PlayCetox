@@ -1,6 +1,8 @@
 .video-player-container {
   position: relative;
-  max-width: 475px;
+  width: 100%; /* Largura responsiva */
+  max-width: 750px; /* Largura máxima do player */
+  aspect-ratio: 16 / 9; /* Mantém proporção fixa de 16:9 */
   margin: 0 auto;
   background-color: black;
   border-radius: 8px;
@@ -11,8 +13,10 @@
 
 video {
   width: 100%;
-  display: block;
+  height: 100%;
+  object-fit: cover; /* Faz o vídeo e o thumbnail preencherem o container sem distorcer */
   background: black;
+  display: block;
 }
 
 .controls-container {
@@ -124,5 +128,23 @@ input[type="range"] {
   100% {
     transform: translate(-50%, -50%) scale(1);
     opacity: 1;
+  }
+}
+
+/* Responsividade para telas menores */
+@media (max-width: 480px) {
+  .video-player-container {
+    max-width: 100%; /* O player ocupa toda a largura da tela */
+    border-radius: 4px; /* Reduz o arredondamento em telas menores */
+  }
+
+  .watermark {
+    font-size: 16px; /* Reduz o tamanho da marca d'água */
+  }
+
+  .center-play-button {
+    width: 60px; /* Reduz o botão central */
+    height: 60px;
+    font-size: 30px; /* Reduz o ícone */
   }
 }
