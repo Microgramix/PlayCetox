@@ -11,6 +11,13 @@ const VideoPlayer = ({ videoSrc, autoplay = false }) => {
   const [progress, setProgress] = useState(0);
   const [showControls, setShowControls] = useState(true);
   const hideControlsTimeout = useRef(null);
+  const lastAllowedTime = useRef(0);
+
+  // Detecta Safari no iOS
+  const isSafariIOS = () => {
+    const ua = window.navigator.userAgent;
+    return /iP(hone|ad|od)/.test(ua) && /Safari/.test(ua) && !/CriOS/.test(ua);
+  };
 
   const updateProgress = () => {
     if (videoRef.current) {
@@ -23,11 +30,16 @@ const VideoPlayer = ({ videoSrc, autoplay = false }) => {
   const preventSeek = () => {
     if (videoRef.current) {
       const currentTime = videoRef.current.currentTime;
-      const duration = videoRef.current.duration;
 
-      if (currentTime > duration - 0.5) {
-        videoRef.current.currentTime = duration - 0.5;
-      } else if (currentTime < 0) {
+      // Se o tempo atual for maior que o permitido, volta para o último tempo válido
+      if (currentTime > lastAllowedTime.current + 0.3) {
+        videoRef.current.currentTime = lastAllowedTime.current;
+      } else {
+        lastAllowedTime.current = currentTime; // Atualiza o último tempo permitido
+      }
+
+      // Bloqueia se for para antes do início
+      if (currentTime < 0) {
         videoRef.current.currentTime = 0;
       }
     }
@@ -36,14 +48,13 @@ const VideoPlayer = ({ videoSrc, autoplay = false }) => {
   useEffect(() => {
     if (videoRef.current) {
       videoRef.current.addEventListener("timeupdate", updateProgress);
-      videoRef.current.addEventListener("timeupdate", preventSeek);
-    }
-    return () => {
-      if (videoRef.current) {
-        videoRef.current.removeEventListener("timeupdate", updateProgress);
-        videoRef.current.removeEventListener("timeupdate", preventSeek);
+
+      // Monitoramento agressivo para Safari iOS
+      if (isSafariIOS()) {
+        const interval = setInterval(preventSeek, 100);
+        return () => clearInterval(interval);
       }
-    };
+    }
   }, []);
 
   useEffect(() => {
@@ -53,7 +64,6 @@ const VideoPlayer = ({ videoSrc, autoplay = false }) => {
     }
   }, [autoplay]);
 
-  // Alterna entre play e pause ao clicar no vídeo
   const togglePlayPause = () => {
     if (videoRef.current.paused) {
       videoRef.current.play();
@@ -64,14 +74,12 @@ const VideoPlayer = ({ videoSrc, autoplay = false }) => {
     }
   };
 
-  // Alterna entre fullscreen e normal
   const toggleFullscreen = () => {
     if (
       document.fullscreenElement === containerRef.current ||
       document.webkitFullscreenElement === containerRef.current ||
       document.msFullscreenElement === containerRef.current
     ) {
-      // Sair do fullscreen
       if (document.exitFullscreen) {
         document.exitFullscreen();
       } else if (document.webkitExitFullscreen) {
@@ -80,7 +88,6 @@ const VideoPlayer = ({ videoSrc, autoplay = false }) => {
         document.msExitFullscreen();
       }
     } else {
-      // Entrar no fullscreen
       if (containerRef.current.requestFullscreen) {
         containerRef.current.requestFullscreen();
       } else if (containerRef.current.webkitRequestFullscreen) {
