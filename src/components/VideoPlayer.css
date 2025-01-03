@@ -1,6 +1,7 @@
 .video-player-container {
   position: relative;
-  max-width: 800px;
+  max-width: 720px;
+  height: 315;
   margin: 0 auto;
   background-color: black;
   border-radius: 8px;
@@ -10,7 +11,7 @@
 }
 
 video {
-  width: 100%;
+ max-width: 100%;
   height: 100%; /* Garante que o vídeo e o thumbnail ocupem toda a altura do container */
   object-fit: cover; /* Ajusta a imagem do thumbnail em cover */
   background: black; /* Fundo preto para áreas sem conteúdo */
