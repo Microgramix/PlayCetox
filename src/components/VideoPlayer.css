@@ -27,8 +27,8 @@ video {
   position: absolute;
   bottom: 65px;
   right: 10px;
-  font-size: 25px;
-  color: rgba(8, 8, 8, 0.5); /* Cor fraca para não atrapalhar o vídeo */
+  font-size: 80px;
+  color: #e71345; /* Cor fraca para não atrapalhar o vídeo */
   z-index: 10;
   pointer-events: none; /* Para garantir que não interfira com os controles */
 }
@@ -82,7 +82,7 @@ button:hover {
 
 .progress {
   height: 100%;
-  background-color: #f00;
+  background-color: #e71345;
   width: 0;
   transition: width 0.2s;
 }
@@ -101,7 +101,7 @@ input[type="range"] {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: red; /* Cor de fundo vermelha */
+  background: #e71345; /* Cor de fundo vermelha */
   border-radius: 50%; /* Forma circular */
   display: flex;
   align-items: center;

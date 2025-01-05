@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import "./VideoPlayer.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlay, faPause, faVolumeUp, faExpand } from "@fortawesome/free-solid-svg-icons";
+import { faPlay, faPause, faExpand } from "@fortawesome/free-solid-svg-icons";
 
 const VideoPlayer = ({ videoSrc, thumbnail, autoplay = false }) => {
   const videoRef = useRef(null);
@@ -20,6 +20,14 @@ const VideoPlayer = ({ videoSrc, thumbnail, autoplay = false }) => {
   const isSafariIOS = () => {
     const ua = window.navigator.userAgent;
     return /iP(hone|ad|od)/.test(ua) && /Safari/.test(ua) && !/CriOS/.test(ua);
+  };
+
+  /**
+   * Detecta qualquer navegador baseado em WebKit no iOS (Safari, Chrome, etc.)
+   */
+  const isWebKitOnIOS = () => {
+    const ua = window.navigator.userAgent;
+    return /iP(hone|ad|od)/.test(ua) && /WebKit/.test(ua) && !/Edg/.test(ua);
   };
 
   /**
@@ -59,7 +67,8 @@ const VideoPlayer = ({ videoSrc, thumbnail, autoplay = false }) => {
     if (videoRef.current) {
       videoRef.current.addEventListener("timeupdate", updateProgress);
 
-      if (isSafariIOS()) {
+      // Aplica monitoramento em navegadores WebKit no iOS
+      if (isSafariIOS() || isWebKitOnIOS()) {
         const interval = setInterval(preventSeek, 100);
         return () => clearInterval(interval);
       }
