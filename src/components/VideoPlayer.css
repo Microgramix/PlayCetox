@@ -27,7 +27,7 @@ video {
   position: absolute;
   bottom: 65px;
   right: 10px;
-  font-size: 80px;
+  font-size: 5px;
   color: #e71345; /* Cor fraca para não atrapalhar o vídeo */
   z-index: 10;
   pointer-events: none; /* Para garantir que não interfira com os controles */
@@ -139,7 +139,7 @@ input[type="range"] {
   }
 
   .watermark {
-    font-size: 5px; /* Reduz o tamanho da marca d'água */
+    font-size: 2px; /* Reduz o tamanho da marca d'água */
   }
 
   .center-play-button {
