@@ -139,7 +139,7 @@ input[type="range"] {
   }
 
   .watermark {
-    font-size: 16px; /* Reduz o tamanho da marca d'água */
+    font-size: 5px; /* Reduz o tamanho da marca d'água */
   }
 
   .center-play-button {
