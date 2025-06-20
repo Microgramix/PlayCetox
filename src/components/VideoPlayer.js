@@ -1,7 +1,8 @@
 import React, { useRef, useState, useEffect } from "react";
 import "./VideoPlayer.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlay, faPause, faExpand } from "@fortawesome/free-solid-svg-icons";
+// Ícone 'faExpand' removido da importação
+import { faPlay, faPause } from "@fortawesome/free-solid-svg-icons";
 
 const VideoPlayer = ({ videoSrc, thumbnail, autoplay = false }) => {
   const videoRef = useRef(null);
@@ -14,25 +15,16 @@ const VideoPlayer = ({ videoSrc, thumbnail, autoplay = false }) => {
   const hideControlsTimeout = useRef(null);
   const lastAllowedTime = useRef(0);
 
-  /**
-   * Detecta se o navegador é Safari no iOS
-   */
   const isSafariIOS = () => {
     const ua = window.navigator.userAgent;
     return /iP(hone|ad|od)/.test(ua) && /Safari/.test(ua) && !/CriOS/.test(ua);
   };
 
-  /**
-   * Detecta qualquer navegador baseado em WebKit no iOS (Safari, Chrome, etc.)
-   */
   const isWebKitOnIOS = () => {
     const ua = window.navigator.userAgent;
     return /iP(hone|ad|od)/.test(ua) && /WebKit/.test(ua) && !/Edg/.test(ua);
   };
 
-  /**
-   * Atualiza o progresso do vídeo na barra
-   */
   const updateProgress = () => {
     if (videoRef.current) {
       const current = videoRef.current.currentTime;
@@ -41,9 +33,6 @@ const VideoPlayer = ({ videoSrc, thumbnail, autoplay = false }) => {
     }
   };
 
-  /**
-   * Impede o usuário de avançar ou retroceder no vídeo
-   */
   const preventSeek = () => {
     if (videoRef.current) {
       const currentTime = videoRef.current.currentTime;
@@ -60,14 +49,9 @@ const VideoPlayer = ({ videoSrc, thumbnail, autoplay = false }) => {
     }
   };
 
-  /**
-   * Monitoramento contínuo do progresso e bloqueio de seek no iOS
-   */
   useEffect(() => {
     if (videoRef.current) {
       videoRef.current.addEventListener("timeupdate", updateProgress);
-
-      // Aplica monitoramento em navegadores WebKit no iOS
       if (isSafariIOS() || isWebKitOnIOS()) {
         const interval = setInterval(preventSeek, 100);
         return () => clearInterval(interval);
@@ -75,9 +59,6 @@ const VideoPlayer = ({ videoSrc, thumbnail, autoplay = false }) => {
     }
   }, []);
 
-  /**
-   * Reproduz o vídeo automaticamente se `autoplay` for true
-   */
   useEffect(() => {
     if (videoRef.current && autoplay) {
       videoRef.current.play();
@@ -86,22 +67,15 @@ const VideoPlayer = ({ videoSrc, thumbnail, autoplay = false }) => {
   }, [autoplay]);
 
   /**
-   * Alterna entre play e pause ao clicar no botão central ou no vídeo
+   * Alterna entre play e pause.
+   * O CÓDIGO DE FULLSCREEN FOI REMOVIDO DAQUI.
    */
   const togglePlayPause = () => {
     if (videoRef.current.paused) {
       videoRef.current.play();
       setIsPlaying(true);
       setShowPlayButton(false);
-
-      // Entra em fullscreen automaticamente no primeiro play
-      if (containerRef.current.requestFullscreen) {
-        containerRef.current.requestFullscreen();
-      } else if (containerRef.current.webkitRequestFullscreen) {
-        containerRef.current.webkitRequestFullscreen();
-      } else if (containerRef.current.msRequestFullscreen) {
-        containerRef.current.msRequestFullscreen();
-      }
+      // O bloco de código que chamava requestFullscreen() foi removido.
     } else {
       videoRef.current.pause();
       setIsPlaying(false);
@@ -109,61 +83,25 @@ const VideoPlayer = ({ videoSrc, thumbnail, autoplay = false }) => {
   };
 
   /**
-   * Alterna entre fullscreen e modo normal ao clicar no botão fullscreen
+   * A FUNÇÃO toggleFullscreen FOI COMPLETAMENTE REMOVIDA.
    */
-  const toggleFullscreen = () => {
-    if (
-      document.fullscreenElement === containerRef.current ||
-      document.webkitFullscreenElement === containerRef.current ||
-      document.msFullscreenElement === containerRef.current
-    ) {
-      // Sai do fullscreen
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      } else if (document.webkitExitFullscreen) {
-        document.webkitExitFullscreen();
-      } else if (document.msExitFullscreen) {
-        document.msExitFullscreen();
-      }
-    } else {
-      // Entra no fullscreen
-      if (containerRef.current.requestFullscreen) {
-        containerRef.current.requestFullscreen();
-      } else if (containerRef.current.webkitRequestFullscreen) {
-        containerRef.current.webkitRequestFullscreen();
-      } else if (containerRef.current.msRequestFullscreen) {
-        containerRef.current.msRequestFullscreen();
-      }
-    }
-  };
 
-  /**
-   * Configura o volume do vídeo
-   */
   const handleVolumeChange = (event) => {
     const newVolume = parseFloat(event.target.value);
     setVolume(newVolume);
     videoRef.current.volume = newVolume;
   };
 
-  /**
-   * Mostra os controles temporariamente ao mover o mouse
-   */
   const handleMouseMove = () => {
     setShowControls(true);
-
     if (hideControlsTimeout.current) {
       clearTimeout(hideControlsTimeout.current);
     }
-
     hideControlsTimeout.current = setTimeout(() => {
       setShowControls(false);
     }, 3000);
   };
 
-  /**
-   * Remove o timeout dos controles ao desmontar o componente
-   */
   useEffect(() => {
     return () => {
       if (hideControlsTimeout.current) {
@@ -172,18 +110,14 @@ const VideoPlayer = ({ videoSrc, thumbnail, autoplay = false }) => {
     };
   }, []);
 
-  /**
-   * Escuta mensagens do iframe para acionar o fullscreen
-   */
   useEffect(() => {
     const handleMessage = (event) => {
+      // Esta função agora apenas dará play/pause, sem fullscreen
       if (event.data === "requestFullscreen") {
         togglePlayPause();
       }
     };
-
     window.addEventListener("message", handleMessage);
-
     return () => {
       window.removeEventListener("message", handleMessage);
     };
@@ -198,7 +132,7 @@ const VideoPlayer = ({ videoSrc, thumbnail, autoplay = false }) => {
       <video
         ref={videoRef}
         src={videoSrc}
-        poster={thumbnail} // Configura o thumbnail do vídeo
+        poster={thumbnail}
         controls={false}
         onClick={togglePlayPause}
       ></video>
@@ -225,9 +159,7 @@ const VideoPlayer = ({ videoSrc, thumbnail, autoplay = false }) => {
             value={volume}
             onChange={handleVolumeChange}
           />
-          <button onClick={toggleFullscreen}>
-            <FontAwesomeIcon icon={faExpand} />
-          </button>
+          {/* O BOTÃO DE FULLSCREEN FOI REMOVIDO DAQUI */}
         </div>
         <div className="watermark">planocetox.com</div>
       </div>
