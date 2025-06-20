@@ -1,37 +1,65 @@
+/* 1. O CONTAINER PRINCIPAL
+  Esta parte está perfeita, mantemos como está.
+*/
 .video-player-container {
-  position: relative;
-  width: 100%; /* Largura responsiva */
-  max-width: 750px; /* Largura máxima do player */
-  aspect-ratio: 16 / 9; /* Mantém proporção fixa de 16:9 */
-  margin: 0 auto;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
   background-color: black;
-  border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
-  cursor: pointer;
 }
 
+/* 2. O ELEMENTO DE VÍDEO
+  AQUI ESTÁ A MUDANÇA! Alteramos 'cover' para 'contain'.
+  Isto garante que o vídeo inteiro seja sempre visível, sem cortes.
+  O espaço extra será preenchido com o 'background-color' (preto) do container.
+*/
 video {
   width: 100%;
   height: 100%;
-  object-fit: cover; /* Faz o vídeo e o thumbnail preencherem o container sem distorcer */
-  background: black;
+  object-fit: contain; /* <-- A MUDANÇA ESTÁ AQUI */
   display: block;
 }
 
-.controls-container {
-  position: relative;
+/* 3. BOTÃO DE PLAY CENTRAL
+  Mantido como está, com a animação.
+*/
+.center-play-button {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #e71345;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  animation: pulse 1.5s infinite;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  z-index: 10;
 }
 
-.watermark {
-  position: absolute;
-  bottom: 65px;
-  right: 10px;
-  font-size: 5px;
-  color: #e71345; /* Cor fraca para não atrapalhar o vídeo */
-  z-index: 10;
-  pointer-events: none; /* Para garantir que não interfira com os controles */
+.center-play-button svg {
+  font-size: 40px;
+  color: white;
 }
+
+@keyframes pulse {
+  0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  50% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.8; }
+  100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+
+/* 4. CONTROLOS INFERIORES
+  Tudo permanece igual aqui.
+*/
+.controls-container { }
 
 .controls {
   position: absolute;
@@ -41,13 +69,14 @@ video {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px;
-  background: rgba(0, 0, 0, 0.7);
+  padding: 10px 20px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
   color: white;
   transform: translateY(100%);
-  transition: transform 0.3s;
+  transition: transform 0.3s ease, opacity 0.3s ease;
   opacity: 0;
   pointer-events: none;
+  z-index: 20;
 }
 
 .controls.visible {
@@ -56,9 +85,9 @@ video {
   pointer-events: auto;
 }
 
-button {
+.controls button {
   padding: 8px;
-  font-size: 16px;
+  font-size: 18px;
   background: none;
   border: none;
   color: white;
@@ -66,85 +95,41 @@ button {
   transition: transform 0.2s;
 }
 
-button:hover {
+.controls button:hover {
   transform: scale(1.1);
 }
 
 .progress-bar {
   flex-grow: 1;
-  height: 5px;
-  background-color: #444;
-  margin: 0 10px;
+  height: 8px;
+  background-color: rgba(255, 255, 255, 0.3);
+  margin: 0 15px;
   position: relative;
-  overflow: hidden;
-  border-radius: 3px;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
 .progress {
   height: 100%;
   background-color: #e71345;
   width: 0;
-  transition: width 0.2s;
+  border-radius: 4px;
 }
 
 input[type="range"] {
   width: 100px;
   margin: 0 10px;
-  background: transparent;
 }
 
-/* Botão central do Play */
-.center-play-button {
+.watermark {
   position: absolute;
-  width: 80px; /* Largura do botão */
-  height: 80px; /* Altura do botão */
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: #e71345; /* Cor de fundo vermelha */
-  border-radius: 50%; /* Forma circular */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  animation: pulse 1.5s infinite;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-}
-
-.center-play-button svg {
-  font-size: 40px; /* Tamanho do ícone branco */
-  color: white; /* Cor do ícone */
-}
-
-@keyframes pulse {
-  0% {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: translate(-50%, -50%) scale(1.1);
-    opacity: 0.8;
-  }
-  100% {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 1;
-  }
-}
-
-/* Responsividade para telas menores */
-@media (max-width: 480px) {
-  .video-player-container {
-    max-width: 100%; /* O player ocupa toda a largura da tela */
-    border-radius: 4px; /* Reduz o arredondamento em telas menores */
-  }
-
-  .watermark {
-    font-size: 2px; /* Reduz o tamanho da marca d'água */
-  }
-
-  .center-play-button {
-    width: 60px; /* Reduz o botão central */
-    height: 60px;
-    font-size: 30px; /* Reduz o ícone */
-  }
+  bottom: 70px;
+  right: 20px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.5);
+  background-color: rgba(0, 0, 0, 0.4);
+  padding: 2px 6px;
+  border-radius: 3px;
+  z-index: 20;
+  pointer-events: none;
 }
